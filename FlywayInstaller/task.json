@@ -1,38 +1,50 @@
 {
-  "$schema": "https://raw.githubusercontent.com/Microsoft/azure-pipelines-task-lib/master/tasks.schema.json",
-  "id": "e4d7a958-82c3-4b55-94da-4ff052cdf119",
-  "name": "FlywayInstaller",
-  "friendlyName": "Flyway Installer",
-  "description": "Installs a specific version of flyway",
-  "author": "Mathieu Filotto",
-  "helpMarkDown": "",
   "category": "Utility",
   "visibility": [
     "Build",
     "Release"
   ],
-  "demands": [],
-  "version": {
-    "Major": "0",
-    "Minor": "0",
-    "Patch": "5"
+  "minimumAgentVersion": "4.265.1",
+  "author": "Pitinga",
+  "execution": {
+    "Node24": {
+      "target": "index.cjs"
+    }
   },
-  "minimumAgentVersion": "1.95.0",
-  "instanceNameFormat": "Use Flyway $(flywayVersion)",
+  "id": "cb3338c8-258b-4b56-90e5-c33a750de123",
+  "name": "FlywayInstaller",
+  "friendlyName": "Flyway Installer",
+  "description": "Instala e disponibiliza Flyway no PATH",
+  "version": {
+    "Major": 1,
+    "Minor": 0,
+    "Patch": 0
+  },
+  "instanceNameFormat": "Install Flyway $(flywayVersion)",
   "inputs": [
     {
       "name": "flywayVersion",
       "type": "string",
-      "label": "Version",
-      "defaultValue": "6.2.0",
+      "label": "Versão",
+      "defaultValue": "13.11.1",
+      "required": true
+    },
+    {
+      "name": "edition",
+      "type": "pickList",
+      "label": "Distribuição",
+      "defaultValue": "redgate",
       "required": true,
-      "helpMarkDown": "Specify the version of flyway that should be installed"
+      "options": {
+        "redgate": "Redgate",
+        "community": "Community"
+      }
+    },
+    {
+      "name": "sha256",
+      "type": "string",
+      "label": "SHA-256 opcional",
+      "required": false
     }
-  ],
-  "execution": {
-    "Node": {
-      "target": ".bin/index.js",
-      "argumentFormat": ""
-    }
-  }
+  ]
 }
