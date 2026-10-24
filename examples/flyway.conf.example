@@ -1,0 +1,4 @@
+# Exemplo fictício: arquivo REAL apenas em Azure DevOps Library > Secure files.
+flyway.url=jdbc:sqlserver://sql-qas.exemplo.local:1433;databaseName=MinhaBase;encrypt=true;trustServerCertificate=false
+flyway.user=usuario_deploy
+flyway.password=SENHA_REAL_SOMENTE_NO_SECURE_FILE

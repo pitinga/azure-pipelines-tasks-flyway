@@ -1,0 +1,21 @@
+# O arquivo flyway-qas.conf deve estar na Library / Secure files e autorizado.
+trigger: none
+pool:
+  vmImage: ubuntu-latest
+steps:
+- checkout: self
+- task: DownloadSecureFile@1
+  name: flywaySecure
+  displayName: 'Baixar config de banco (Secure File)'
+  inputs:
+    secureFile: 'flyway-qas.conf'
+- task: FlywayInstaller@1
+  inputs:
+    flywayVersion: '13.11.1' # prefira fixar em QAS/PRD
+    edition: 'redgate'
+- task: FlywayCLI@1
+  inputs:
+    command: 'validate'
+    workingDirectory: '$(Build.SourcesDirectory)/database/sql'
+    configFile: '$(flywaySecure.secureFilePath)'
+# Após validate, uma etapa FlywayCLI@1 com command: migrate pode ser habilitada com aprovações.

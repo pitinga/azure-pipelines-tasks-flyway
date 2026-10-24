@@ -1,0 +1,18 @@
+# Crie e autorize Variable Group Flyway-QAS com DbJdbcUrl, DbUser e DbPassword (secret).
+trigger: none
+pool:
+  vmImage: ubuntu-latest
+variables:
+- group: Flyway-QAS
+steps:
+- checkout: self
+- task: FlywayInstaller@1
+  inputs:
+    flywayVersion: '13.11.1'
+- task: FlywayCLI@1
+  inputs:
+    command: 'validate'
+    workingDirectory: '$(Build.SourcesDirectory)/database/sql'
+    url: '$(DbJdbcUrl)'
+    user: '$(DbUser)'
+    password: '$(DbPassword)'

@@ -18,3 +18,9 @@ test('clean denied by default', () => {
   assert.throws(() => r.commandAllowed('clean'));
   assert.equal(r.commandAllowed('clean',true),'clean');
 });
+
+test('latest parses stable Flyway release tag', () => {
+  assert.equal(r.releaseVersion({tag_name:'flyway-13.11.1',prerelease:false,draft:false}), '13.11.1');
+  assert.throws(() => r.releaseVersion({tag_name:'flyway-13.11.1-rc1',prerelease:true}));
+  assert.throws(() => r.releaseVersion({tag_name:'invalid'}));
+});

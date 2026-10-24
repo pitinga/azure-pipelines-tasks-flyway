@@ -35,6 +35,12 @@ function versionCheck(value) {
   }
   return value;
 }
+function releaseVersion(payload) {
+  if (!payload || typeof payload.tag_name !== 'string') throw new Error('Resposta de release do Flyway sem tag_name.');
+  const matched = /^flyway-(\d+\.\d+\.\d+)$/.exec(payload.tag_name);
+  if (!matched || payload.prerelease || payload.draft) throw new Error('Release mais recente inválida, beta ou sem versão estável.');
+  return versionCheck(matched[1]);
+}
 function target(platform = process.platform, arch = process.arch) {
   const combinations = {
     'win32:x64': ['windows-x64.zip', '.cmd'],
@@ -108,5 +114,5 @@ function findOnPath(name, envPath = process.env.PATH || '', platform = process.p
   return '';
 }
 module.exports = { getInput, requiredInput, boolInput, escapeLogging, taskFail, taskSuccess,
-  versionCheck, target, downloadUrl, parseOptions, validateOptions, flywayLocation,
+  versionCheck, releaseVersion, target, downloadUrl, parseOptions, validateOptions, flywayLocation,
   commandAllowed, findOnPath };

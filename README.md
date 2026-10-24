@@ -1,16 +1,49 @@
-# Flyway Azure Pipelines Tasks — modernização 1.0.0
+# Flyway Tasks para Azure DevOps — v1.1.0
 
-Branch de modernização do projeto originalmente criado por Mathieu Filotto, sob licença MIT. A branch master foi preservada.
+Extensão independente para Azure DevOps Pipelines. Modernização do projeto MIT de Mathieu Filotto.
 
-## Implementação
+> **Leia o [Guia completo do usuário](docs/USO-DA-EXTENSAO.md):** documentação de todos os parâmetros, exemplos JDBC, senhas, Secure Files, versionamento e troubleshooting.
 
-- FlywayInstaller@1 e FlywayCLI@1, novos GUIDs e handler Node24
-- Código JavaScript sem dependências npm de runtime
-- Variáveis de ambiente para FLYWAY_URL, FLYWAY_USER e FLYWAY_PASSWORD
-- Comando clean desabilitado por padrão
-- Versão padrão Flyway 13.11.1; agente mínimo 4.265.1
+## Tarefas
 
-## Comandos PowerShell 7
+- `FlywayInstaller@1`: instala Flyway Redgate ou Community. **`flywayVersion: latest`** é o padrão e busca o último release estável ao executar o job. Para PRD, **fixe a versão**.
+- `FlywayCLI@1`: comandos `validate` (padrão), `info`, `migrate`, `baseline`, `repair` e `clean` (bloqueado por padrão). Configuração via Secure File `.conf` / `.toml` ou variáveis secretas.
+
+## Conexão segura com banco — método Secure File
+
+1. Crie, fora do repositório, um arquivo `flyway-qas.conf` com o endereço do banco, usuário e senha.
+2. Faça upload em **Pipelines → Library → Secure files**, autorizando explicitamente o pipeline.
+3. Use `DownloadSecureFile@1` para obter o arquivo e repassar seu caminho em `configFile`.
+
+Exemplo do arquivo (a senha abaixo é apenas ilustrativa — a real fica **somente** no Secure File):
+
+```properties
+flyway.url=jdbc:sqlserver://sql-qas.exemplo.local:1433;databaseName=MinhaBase;encrypt=true;trustServerCertificate=false
+flyway.user=usuario_deploy
+flyway.password=SENHA_REAL_SOMENTE_NO_SECURE_FILE
+```
+
+```yaml
+steps:
+- task: DownloadSecureFile@1
+  name: flywaySecure
+  inputs:
+    secureFile: 'flyway-qas.conf'
+- task: FlywayInstaller@1
+  inputs:
+    flywayVersion: '13.11.1' # PRD: versão fixa; omitido = latest
+- task: FlywayCLI@1
+  inputs:
+    command: 'validate'
+    workingDirectory: '$(Build.SourcesDirectory)/database/sql'
+    configFile: '$(flywaySecure.secureFilePath)'
+```
+
+O Secure File é removido automaticamente ao finalizar o job pela task Microsoft. O `configFile` é passado ao processo Flyway por `FLYWAY_CONFIG_FILES`, não impresso no log nem lido pela própria task. Alternativamente, use `url`, `user` e `password` com variável secreta. **Não versione arquivos com credenciais.**
+
+## Testes e VSIX
+
+Requer Node >=22 localmente e Azure Pipelines Agent >=4.265.1 com executor Node24.
 
 ```powershell
 npm run test
@@ -18,27 +51,12 @@ npm run build
 npm run package
 ```
 
-O pacote VSIX precisa ser validado com tfx-cli antes de publicar. O publisher `pitinga` é provisório: confirme no Marketplace. Publicação privada até realizar os testes em agente e banco reais.
+O publisher `pitinga` no manifesto é provisório: confirme se esse ID existe no Marketplace. Publicação e teste real de Flyway em agentes Windows/Linux com banco não foram realizados.
 
-## Azure Pipelines YAML
+## Exemplos
 
-```yaml
-steps:
-  - task: FlywayInstaller@1
-    inputs:
-      flywayVersion: '13.11.1'
-      edition: redgate
-  - task: FlywayCLI@1
-    inputs:
-      command: validate
-      workingDirectory: '$(Build.SourcesDirectory)/database/sql'
-      url: '$(DbJdbcUrl)'
-      user: '$(DbUser)'
-      password: '$(DbPassword)'
-```
-
-A variável DbPassword deve ser secreta. Não envie credenciais diretamente nas opções CLI.
-
-## Limitações e validação
-
-O build e a execução em agentes Windows/Linux e bancos reais precisam de testes de integração. Os executáveis Flyway são baixados durante o job. O checksum informado só é validado ao baixar (não ao reutilizar cache). Em caso de política corporativa de rede, configure o acesso HTTPS à fonte do Flyway.
+- [Pipeline usando Secure File](examples/azure-pipelines-secure-file.yml)
+- [Pipeline usando variável secreta](examples/azure-pipelines-variables.yml)
+- [Arquivo flyway.conf de exemplo](examples/flyway.conf.example)
+- [Arquivo flyway.toml de exemplo](examples/flyway.toml.example)
+- [Guia completo: todos os inputs e solução de problemas](docs/USO-DA-EXTENSAO.md)

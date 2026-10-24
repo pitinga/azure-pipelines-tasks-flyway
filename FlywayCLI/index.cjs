@@ -36,8 +36,20 @@ async function run() {
   const supplied = getInput('flywayPath');
   const executable = supplied || findOnPath('flyway');
   if (!executable || !fs.existsSync(executable)) throw new Error('Flyway não encontrado. Execute a task FlywayInstaller antes de FlywayCLI ou configure flywayPath.');
+  const configFile = getInput('configFile').trim();
+  let configPath = '';
+  if (configFile) {
+    configPath = path.resolve(configFile);
+    if (!fs.existsSync(configPath) || !fs.statSync(configPath).isFile()) {
+      throw new Error('configFile não é um arquivo acessível. Utilize $(nomeDaTask.secureFilePath) após DownloadSecureFile@1.');
+    }
+  }
   const args = validateOptions(parseOptions(getInput('commandOptions')));
   const env = { ...process.env, FLYWAY_LOCATIONS: flywayLocation(directory) };
+  if (configPath) {
+    env.FLYWAY_CONFIG_FILES = configPath;
+    console.log('Carregando Flyway configFile externo (conteúdo não exibido).');
+  }
   // Env avoids sensitive connection values appearing in the process command line.
   for (const [input, key] of [['url','FLYWAY_URL'], ['user','FLYWAY_USER'], ['password','FLYWAY_PASSWORD']]) {
     const value = getInput(input);

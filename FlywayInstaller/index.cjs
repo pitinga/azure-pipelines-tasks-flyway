@@ -6,8 +6,31 @@ const https = require('node:https');
 const crypto = require('node:crypto');
 const { pipeline } = require('node:stream/promises');
 const { spawn } = require('node:child_process');
-const { getInput, requiredInput, taskFail, taskSuccess, versionCheck, target, downloadUrl } = require(require('node:fs').existsSync(require('node:path').join(__dirname, 'runtime.cjs')) ? './runtime.cjs' : '../shared/runtime.cjs');
+const { getInput, requiredInput, taskFail, taskSuccess, versionCheck, releaseVersion, target, downloadUrl } = require(require('node:fs').existsSync(require('node:path').join(__dirname, 'runtime.cjs')) ? './runtime.cjs' : '../shared/runtime.cjs');
 
+async function resolveVersion(inputVersion) {
+  if (inputVersion !== 'latest') return versionCheck(inputVersion);
+  const url = 'https://api.github.com/repos/flyway/flyway/releases/latest';
+  const response = await new Promise((resolve, reject) => {
+    const req = https.get(url, {timeout: 15000,
+      headers: {'User-Agent':'azure-pipelines-flyway-installer','Accept':'application/vnd.github+json'}
+    }, resolve);
+    req.once('timeout', () => req.destroy(new Error('Timeout ao consultar o latest Flyway.')));
+    req.once('error', reject);
+  });
+  if (response.statusCode !== 200) {
+    response.resume();
+    throw new Error(`Falha ao consultar latest do Flyway (HTTP ${response.statusCode}). Fixe uma versão ou libere api.github.com no proxy.`);
+  }
+  let json = '';
+  for await (const chunk of response) {
+    json += chunk.toString('utf8');
+    if (json.length > 131072) throw new Error('Resposta de release excessivamente grande.');
+  }
+  const version = releaseVersion(JSON.parse(json));
+  console.log(`Versão estável latest do Flyway: ${version}`);
+  return version;
+}
 async function exec(file, args) {
   await new Promise((resolve, reject) => {
     const child = spawn(file, args, { stdio: 'inherit', shell: false });
@@ -53,7 +76,7 @@ async function extract(filename, destination) {
   }
 }
 async function run() {
-  const version = versionCheck(requiredInput('flywayVersion'));
+  const version = await resolveVersion(getInput('flywayVersion', 'latest').trim() || 'latest');
   const edition = getInput('edition', 'redgate').trim();
   if (!['redgate', 'community'].includes(edition)) throw new Error('Distribuição deve ser redgate ou community.');
   const wantedHash = getInput('sha256').trim();
@@ -98,4 +121,4 @@ async function run() {
   return binary;
 }
 if (require.main === module) run().then(taskSuccess).catch(taskFail);
-module.exports = { run, download, extract, verifySha256 };
+module.exports = { run, download, extract, verifySha256, resolveVersion };
