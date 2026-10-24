@@ -1,0 +1,66 @@
+name: Build Flyway extension VSIX
+
+on:
+  push:
+    branches:
+      - feature/modernize-node24-v1
+    paths-ignore:
+      - '**/*.vsix'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout modernization branch
+        uses: actions/checkout@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run tests
+        run: npm test
+      - name: Build tasks
+        run: npm run build
+      - name: Package VSIX with official TFX CLI
+        run: npx --yes tfx-cli@0.24.2 extension create --manifest-globs vss-extension.json --output-path dist
+      - name: Verify VSIX content
+        shell: python
+        run: |
+          import glob, json, zipfile
+          packages = glob.glob('dist/*.vsix')
+          assert len(packages) == 1, f'Expected one VSIX, got {packages}'
+          package = packages[0]
+          with zipfile.ZipFile(package) as archive:
+              names = set(archive.namelist())
+              assert 'extension.vsixmanifest' in names
+              assert 'extension.vsomanifest' in names
+              assert '[Content_Types].xml' in names
+              for task in ['FlywayCLI','FlywayInstaller']:
+                  assert f'{task}/task.json' in names, task
+                  assert f'{task}/index.cjs' in names, task
+                  assert f'{task}/runtime.cjs' in names, task
+                  task_info = json.loads(archive.read(f'{task}/task.json'))
+                  assert 'Node24' in task_info['execution']
+              print(f'Verified package: {package}; {len(names)} entries')
+      - name: Upload GitHub Actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flyway-tasks-v1.1.0-vsix
+          path: dist/*.vsix
+          if-no-files-found: error
+          retention-days: 90
+      - name: Attach package to GitHub pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PACKAGE=$(find dist -maxdepth 1 -name '*.vsix' -print -quit)
+          if gh release view v1.1.0-rc1 >/dev/null 2>&1; then
+            gh release upload v1.1.0-rc1 "$PACKAGE" --clobber
+          else
+            gh release create v1.1.0-rc1 "$PACKAGE" --target "$GITHUB_SHA" --prerelease --title "Flyway Tasks 1.1.0 (pré-lançamento)" --notes "Extensão Azure DevOps em teste. VSIX criado com tfx-cli e validado no GitHub Actions. Não publicado no Marketplace."
+          fi
