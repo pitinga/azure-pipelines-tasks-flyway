@@ -1,4 +1,4 @@
-# Flyway - Database Migration Tasks (v1.1.3)
+# Flyway - Database Migration Tasks (v1.1.4)
 
 **Duas tasks modernas (Node24):**
 - `FlywayInstaller@1`: instala a última versão estável `latest` ou versão exata, nas edições Redgate/Community.
@@ -22,6 +22,6 @@
 ```
 
 **Documentação de todos os parâmetros, exemplos e segurança:**
-https://github.com/pitinga/azure-pipelines-tasks-flyway/blob/feature/modernize-node24-v1/docs/USO-DA-EXTENSAO.md
+https://github.com/pitinga/azure-pipelines-tasks-flyway/blob/master/docs/USO-DA-EXTENSAO.md
 
 Fixe a versão do Flyway em PRD para garantir releases reprodutíveis. Requer Azure Pipelines Agent >=4.265.1 (Node24).
