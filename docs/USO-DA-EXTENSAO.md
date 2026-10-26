@@ -1,4 +1,4 @@
-# Guia completo de uso — Flyway Tasks v1.1.0
+# Guia completo de uso — Flyway Tasks v1.1.1
 
 ## Fluxo de execução
 
@@ -14,10 +14,10 @@ O agente precisa acessar o banco de dados pela rede/DNS/firewall. A task não ab
 | Parâmetro YAML | Padrão | Explicação |
 |---|---|---|
 | `flywayVersion` | `latest` | Consulta a versão estável mais recente no GitHub (`api.github.com/repos/flyway/flyway/releases/latest`) **a cada execução** e instala essa versão. Também aceita `13.11.1`, por exemplo. Prefira **versão fixa em PRD** para reprodutibilidade. Se a consulta falhar, a task falha: não utiliza uma versão antiga silenciosamente. |
-| `edition` | `redgate` | `redgate`: distribuição no servidor Redgate. `community`: distribuição open-source nos GitHub releases. Funcionalidades dependem de edição/licença. |
+| `edition` | `redgate` | `redgate`: distribuição no servidor Redgate. `community`: distribuição open-source; downloads pelo Maven Central até 11.8.x e pelo GitHub Releases a partir de 11.9.0. Funcionalidades dependem de edição/licença. |
 | `sha256` | vazio | Hash SHA-256 opcional, com 64 dígitos hexadecimais, verificado **apenas durante download novo**; não revalida pacotes existentes no cache. Para uso, consulte o checksum disponibilizado pelo fornecedor. |
 
-Downloads por HTTPS. Plataformas previstas no código: Windows x64, Linux x64, macOS x64 e ARM64. O agente precisa alcançar `api.github.com` para `latest`, além do domínio de download da edição escolhida.
+Download 404 do Maven Central para Flyway 13.x indica task antiga: instale a versão 1.1.1 desta extensão, use `edition: community` e selecione `flywayVersion: 13.10.3` ou superior. Os IDs da extensão modernizada não substituem a task legacy de outro publisher.\n\nDownloads por HTTPS. Plataformas previstas no código: Windows x64, Linux x64, macOS x64 e ARM64. O agente precisa alcançar `api.github.com` para `latest`, além do domínio de download da edição escolhida.
 
 **Atenção:** `latest` indica o último release estável **na execução do pipeline**; uma atualização do Flyway entre duas execuções pode introduzir incompatibilidades. Fixe a versão em PRD.
 
