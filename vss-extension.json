@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "pitinga-database-migration-tasks",
   "name": "Database Migration Tasks",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "publisher": "pitinga",
   "targets": [
     {
