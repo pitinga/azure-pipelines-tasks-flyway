@@ -8,6 +8,10 @@ on:
       - '**/*.vsix'
   workflow_dispatch:
 
+concurrency:
+  group: flyway-extension-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
