@@ -18,7 +18,7 @@
   "version": {
     "Major": 1,
     "Minor": 1,
-    "Patch": 0
+    "Patch": 1
   },
   "instanceNameFormat": "Instalar Flyway $(flywayVersion)",
   "inputs": [
@@ -28,7 +28,7 @@
       "label": "Versão do Flyway",
       "defaultValue": "latest",
       "required": true,
-      "helpMarkDown": "Padrão **latest**, consulta a versão estável mais recente no GitHub a cada job (requer api.github.com). Para deployments reprodutíveis e PRD fixe, por exemplo, `13.11.1`."
+      "helpMarkDown": "Padrão latest: consulta release estável no GitHub. Para deploy reprodutível fixe 13.10.3 ou 13.11.1; em Community CLI desde 11.9, downloads são feitos do GitHub Releases."
     },
     {
       "name": "edition",
