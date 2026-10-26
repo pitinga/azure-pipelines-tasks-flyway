@@ -6,7 +6,7 @@ test('manifest Node24 and IDs', () => {
  const manifest=require('../vss-extension.json');
  const tasks=['FlywayInstaller','FlywayCLI'].map(x=>JSON.parse(fs.readFileSync(path.join(root,x,'task.json'))));
  assert.equal(manifest.publisher,'pitinga');
- assert.equal(manifest.version,'1.1.3');
+ assert.equal(manifest.version,'1.1.4');
  assert.equal(tasks.find(t=>t.name==='FlywayInstaller').version.Patch,2);
  assert.equal(tasks.find(t=>t.name==='FlywayCLI').version.Patch,0);
  assert.equal(new Set(tasks.map(x=>x.id)).size,2);

@@ -1,4 +1,4 @@
-# Guia completo de uso — Flyway Tasks v1.1.1
+# Guia completo de uso — Flyway Tasks v1.1.4
 
 ## Fluxo de execução
 
