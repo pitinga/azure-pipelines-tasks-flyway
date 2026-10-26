@@ -1,4 +1,4 @@
-# Flyway Tasks para Azure DevOps v1.1.0
+# Flyway - Database Migration Tasks (v1.1.3)
 
 **Duas tasks modernas (Node24):**
 - `FlywayInstaller@1`: instala a última versão estável `latest` ou versão exata, nas edições Redgate/Community.
