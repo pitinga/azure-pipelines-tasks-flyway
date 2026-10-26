@@ -1,4 +1,4 @@
-# Flyway Tasks para Azure DevOps — v1.1.0
+# Flyway Tasks para Azure DevOps — v1.1.1
 
 Extensão independente para Azure DevOps Pipelines. Modernização do projeto MIT de Mathieu Filotto.
 
@@ -6,7 +6,7 @@ Extensão independente para Azure DevOps Pipelines. Modernização do projeto MI
 
 ## Tarefas
 
-- `FlywayInstaller@1`: instala Flyway Redgate ou Community. **`flywayVersion: latest`** é o padrão e busca o último release estável ao executar o job. Para PRD, **fixe a versão**.
+- `FlywayInstaller@1`: instala Flyway Redgate ou Community (Community usa Maven antes de 11.9.0 e GitHub Releases a partir de 11.9.0). **`flywayVersion: latest`** é o padrão e busca o último release estável ao executar o job. Para PRD, **fixe a versão**.
 - `FlywayCLI@1`: comandos `validate` (padrão), `info`, `migrate`, `baseline`, `repair` e `clean` (bloqueado por padrão). Configuração via Secure File `.conf` / `.toml` ou variáveis secretas.
 
 ## Conexão segura com banco — método Secure File
@@ -32,6 +32,7 @@ steps:
 - task: FlywayInstaller@1
   inputs:
     flywayVersion: '13.11.1' # PRD: versão fixa; omitido = latest
+    edition: 'community' # Download oficial GitHub Releases
 - task: FlywayCLI@1
   inputs:
     command: 'validate'
@@ -51,7 +52,7 @@ npm run build
 npm run package
 ```
 
-O publisher `pitinga` no manifesto é provisório: confirme se esse ID existe no Marketplace. Publicação e teste real de Flyway em agentes Windows/Linux com banco não foram realizados.
+O manifesto utiliza o publisher `pitinga`. O pacote gerado no GitHub Releases é um pré-lançamento técnico; a publicação no Visual Studio Marketplace requer credenciais/permissões do publisher. A nova extensão possui IDs de task próprios e **não substitui automaticamente** a extensão antiga `mfilotto`. Teste a instalação e migrations em ambiente DEV/QAS antes de PRD.
 
 ## Exemplos
 
