@@ -1,91 +1,100 @@
 {
-    "id": "b5241088-1066-4c72-bb30-a9138dcf5d83",
-    "name": "FlywayCLI",
-    "friendlyName": "Flyway CLI",
-    "description": "Execute flyway cli commands",
-    "author": "Mathieu Filotto",
-    "helpMarkDown": "",
-    "category": "Utility",
-    "visibility": [
-        "Build",
-        "Release"
-    ],
-    "demands": [],
-    "version": {
-        "Major": "0",
-        "Minor": "0",
-        "Patch": "3"
-    },
-    "minimumAgentVersion": "1.95.0",
-    "instanceNameFormat": "flyway $(command)",
-    "groups": [
-        {
-            "name": "variables",
-            "displayName": "Variables",
-            "isExpanded": false,
-            "visibleRule": "command = migrate || command = clean || command = info || command = validate || command = baseline || command = repair"
-        }
-    ],
-    "inputs": [{
-            "name": "command",
-            "type": "pickList",
-            "label": "Command",
-            "defaultValue": "migrate",
-            "required": true,
-            "helpMarkDown": "The flyway command to run.",
-            "options": {
-                "migrate": "migrate",
-                "clean": "clean",
-                "info": "info",
-                "validate": "validate",
-                "baseline": "baseline",
-                "repair": "repair"
-            },
-            "properties": {
-                "EditableOptions": "False"
-            }
-        },
-        {
-            "name": "workingDirectory",
-            "type": "filePath",
-            "label": "SQL scripts directory",
-            "defaultValue": "$(System.DefaultWorkingDirectory)",
-            "helpMarkDown": "Flyway SQL scripts directory. If empty, the root of the repository (build) or artifacts (release) is used, which is $(System.DefaultWorkingDirectory)",
-            "required": "false"
-        },
-        {
-            "name": "url",
-            "type": "string",
-            "label": "JDBC url",
-            "helpMarkDown": "The jdbc url must follow standard format. These formats can be found on Flyway documentation. [Ex for SQL Server](https://flywaydb.org/documentation/database/sqlserver). But first be sure [your database is supported](https://flywaydb.org/documentation/commandline/#jdbc-drivers)",
-            "required": true
-        },
-        {
-            "name": "user",
-            "type": "string",
-            "label": "Database user",
-            "helpMarkDown": "The user to use to connect to the database",
-            "required": false
-        },
-        {
-            "name": "password",
-            "type": "string",
-            "label": "Database password",
-            "helpMarkDown": "The password to use to connect to the database",
-            "required": false
-        },               
-        {
-            "name": "commandOptions",
-            "type": "string",
-            "label": "Command Options",
-            "required": "false",
-            "helpMarkDown": "Any additional options for the selected command such as `-input=true`. Multiple options can be provided delimited by spaces as `-option1=value -option2=value -option3=value`"
-        }
-    ],
-    "execution": {
-        "Node": {
-            "target": ".bin/index.js",
-            "argumentFormat": ""
-        }
+  "category": "Utility",
+  "visibility": [
+    "Build",
+    "Release"
+  ],
+  "minimumAgentVersion": "4.265.1",
+  "author": "Pitinga",
+  "execution": {
+    "Node24": {
+      "target": "index.cjs"
     }
+  },
+  "id": "6bb67f4f-9f68-46f1-8a16-f1bf416a6c85",
+  "name": "FlywayCLI",
+  "friendlyName": "Flyway CLI",
+  "description": "Executa migrações com JDBC e configuração segura em .conf/.toml",
+  "version": {
+    "Major": 1,
+    "Minor": 1,
+    "Patch": 0
+  },
+  "instanceNameFormat": "Flyway $(command)",
+  "inputs": [
+    {
+      "name": "command",
+      "type": "pickList",
+      "label": "Comando Flyway",
+      "defaultValue": "validate",
+      "required": true,
+      "options": {
+        "migrate": "migrate",
+        "validate": "validate",
+        "info": "info",
+        "baseline": "baseline",
+        "repair": "repair",
+        "clean": "clean"
+      },
+      "helpMarkDown": "validate: confere migrações; info: histórico; migrate: aplica alterações; baseline: estado inicial; repair: metadados do histórico; clean: APAGA objetos e exige allowClean=true."
+    },
+    {
+      "name": "workingDirectory",
+      "type": "filePath",
+      "label": "Diretório SQL de migrations",
+      "defaultValue": "$(System.DefaultWorkingDirectory)",
+      "required": true,
+      "helpMarkDown": "Pasta contendo V1__nome.sql, V2__nome.sql etc. Define FLYWAY_LOCATIONS. Exemplo $(Build.SourcesDirectory)/database/sql."
+    },
+    {
+      "name": "configFile",
+      "type": "filePath",
+      "label": "Arquivo Flyway de configuração (.conf/.toml) via Secure File",
+      "required": false,
+      "helpMarkDown": "Use `$(flywaySecure.secureFilePath)` após `DownloadSecureFile@1` (com name: flywaySecure). Define FLYWAY_CONFIG_FILES sem imprimir conteúdo. Arquivo deve existir no agente no mesmo job. Campos url/user/password se fornecidos prevalecem sobre o arquivo."
+    },
+    {
+      "name": "url",
+      "type": "string",
+      "label": "JDBC URL (opcional com configFile)",
+      "required": false,
+      "helpMarkDown": "Exemplo SQL Server: jdbc:sqlserver://host:1433;databaseName=MinhaBase;encrypt=true;trustServerCertificate=false. Ou PostgreSQL: jdbc:postgresql://host:5432/banco. Se usar Secure File deixe vazio."
+    },
+    {
+      "name": "user",
+      "type": "string",
+      "label": "Usuário do banco (opcional)",
+      "required": false,
+      "helpMarkDown": "Usuário de migração do banco. Opcional quando presente no Secure File. Se informado, sobrepõe o arquivo."
+    },
+    {
+      "name": "password",
+      "type": "string",
+      "label": "Senha do banco (opcional)",
+      "required": false,
+      "helpMarkDown": "Informe variável secreta do Azure DevOps, como $(DbPassword), nunca texto em claro. Alternativa: senha dentro de Secure File configurado em configFile. Enviado via FLYWAY_PASSWORD, não como argumento."
+    },
+    {
+      "name": "commandOptions",
+      "type": "multiLine",
+      "label": "Opções adicionais do Flyway",
+      "required": false,
+      "helpMarkDown": "Exemplos: -outOfOrder=true ou -baselineOnMigrate=false. Use aspas para espaços; não informe senhas, usuário, URL, tokens ou licenças aqui."
+    },
+    {
+      "name": "allowClean",
+      "type": "boolean",
+      "label": "Permitir comando destrutivo clean",
+      "defaultValue": false,
+      "required": false,
+      "helpMarkDown": "Desabilitado por padrão. Só libera clean na task quando true; não substitui proteções internas do Flyway nem aprovações de PRD."
+    },
+    {
+      "name": "flywayPath",
+      "type": "filePath",
+      "label": "Executável Flyway opcional",
+      "required": false,
+      "helpMarkDown": "Caminho absoluto do flyway ou flyway.cmd. Em geral deixe vazio após FlywayInstaller@1."
+    }
+  ]
 }

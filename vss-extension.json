@@ -1,67 +1,69 @@
 {
-    "manifestVersion": 1,
-    "id": "azure-pipelines-tasks-flyway",
-    "name": "Flyway Build & Release Tasks",
-    "version": "0.1.1",
-    "publisher": "mfilotto",
-    "targets": [{
-        "id": "Microsoft.VisualStudio.Services"
-    }],
-    "description": "Tasks to execute flyway commands during Azure DevOps Build & Release pipelines",
-    "categories": [
-        "Azure Pipelines"
-    ],
-    "icons": {
-        "default": "vss-extension-icon.png"
+  "manifestVersion": 1,
+  "id": "pitinga-database-migration-tasks",
+  "name": "Flyway - Database Migration Tasks",
+  "version": "1.1.3",
+  "publisher": "pitinga",
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "description": "Instala e executa Flyway em Azure Pipelines para versionamento e migrações de banco de dados",
+  "categories": [
+    "Azure Pipelines"
+  ],
+  "icons": {
+    "default": "images/extension-icon.png"
+  },
+  "files": [
+    {
+      "path": "FlywayInstaller/.dist",
+      "packagePath": "FlywayInstaller"
     },
-    "files": [
-        { "path": "FlywayInstaller/.dist", "packagePath": "FlywayInstaller" },
-        { "path": "FlywayCLI/.dist", "packagePath": "FlywayCLI" }
-    ],
-    "repository" : {
-        "type" : "git",
-        "uri" : "https://github.com/mfilotto/azure-pipelines-tasks-flyway"
+    {
+      "path": "FlywayCLI/.dist",
+      "packagePath": "FlywayCLI"
     },
-    "content": {
-        "details": {
-            "path": "overview.md"
-        }
-    },    
-    "links": {
-        "support": {
-            "uri": "https://github.com/mfilotto/azure-pipelines-tasks-flyway/issues"
-        },
-        "license": {
-            "uri": "https://github.com/mfilotto/azure-pipelines-tasks-flyway/blob/master/LICENSE"
-        }
-    }, 
-    "galleryFlags": [
-        "Public",
-        "Preview"
-    ],
-    "tags" : [
-        "flyway", "azurerm", "azure", "infrastructure as code", "iac", "cloud", "deploy", "database"
-    ],
-    "contributions": [
-        {
-            "id": "azure-pipelines-tasks-flyway-installer",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
-            "properties": {
-                "name": "FlywayInstaller"
-            }
-        },
-        {
-            "id": "azure-pipelines-tasks-flyway-cli",
-            "type": "ms.vss-distributed-task.task",
-            "targets": [
-                "ms.vss-distributed-task.tasks"
-            ],
-            "properties": {
-                "name": "FlywayCLI"
-            }
-        }        
-    ]
+    {
+      "path": "images/extension-icon.png",
+      "addressable": true
+    },
+    {
+      "path": "overview.md",
+      "addressable": true
+    }
+  ],
+  "content": {
+    "details": {
+      "path": "overview.md"
+    }
+  },
+  "galleryFlags": [],
+  "contributions": [
+    {
+      "id": "pitinga-flyway-installer",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "FlywayInstaller"
+      }
+    },
+    {
+      "id": "pitinga-flyway-cli",
+      "type": "ms.vss-distributed-task.task",
+      "targets": [
+        "ms.vss-distributed-task.tasks"
+      ],
+      "properties": {
+        "name": "FlywayCLI"
+      }
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "uri": "https://github.com/pitinga/azure-pipelines-tasks-flyway"
+  }
 }

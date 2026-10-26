@@ -1,0 +1,5 @@
+# Exemplo fictício. Não versione um arquivo com senha real.
+[environments.default]
+url = "jdbc:postgresql://pg-qas.exemplo.local:5432/minha_base"
+user = "usuario_deploy"
+password = "SENHA_REAL_SOMENTE_NO_SECURE_FILE"

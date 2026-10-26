@@ -1,0 +1,70 @@
+name: Publish Flyway to Azure DevOps Marketplace
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Digite PUBLICAR para confirmar a publicação no Marketplace'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: flyway-marketplace-production
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/master' && inputs.confirmation == 'PUBLICAR'
+    runs-on: ubuntu-latest
+    environment: marketplace-production
+    timeout-minutes: 20
+    steps:
+      - name: Checkout approved release
+        uses: actions/checkout@v4
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Test and build
+        run: |
+          npm test
+          npm run build
+      - name: Create VSIX
+        run: npx --yes tfx-cli@0.24.2 extension create --manifest-globs vss-extension.json --output-path dist
+      - name: Validate extension package
+        run: |
+          python3 - <<'PY'
+          import glob, json, zipfile
+          packages = glob.glob('dist/*.vsix')
+          assert len(packages) == 1, f'Expected exactly one VSIX: {packages}'
+          with zipfile.ZipFile(packages[0]) as z:
+              for name in ('extension.vsixmanifest', 'extension.vsomanifest', 'FlywayInstaller/task.json', 'FlywayCLI/task.json'):
+                  assert name in z.namelist(), f'Missing {name}'
+              manifest = json.load(open('vss-extension.json'))
+              assert manifest['publisher'] == 'pitinga'
+              assert manifest['id'] == 'pitinga-database-migration-tasks'
+          print('VSIX verified:', packages[0])
+          PY
+      - name: Publish to Marketplace
+        env:
+          VS_MARKETPLACE_TOKEN: ${{ secrets.VS_MARKETPLACE_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -z "${VS_MARKETPLACE_TOKEN:-}" ]]; then
+            echo "::error::Crie o secret VS_MARKETPLACE_TOKEN no environment marketplace-production."
+            exit 1
+          fi
+          mapfile -t packages < <(find dist -maxdepth 1 -type f -name '*.vsix' -print)
+          if [[ ${#packages[@]} -ne 1 ]]; then
+            echo "::error::Esperado um unico VSIX; encontrados ${#packages[@]}."
+            exit 1
+          fi
+          npx --yes tfx-cli@0.24.2 extension publish \
+            --publisher pitinga \
+            --vsix "${packages[0]}" \
+            --auth-type pat \
+            --token "$VS_MARKETPLACE_TOKEN"
