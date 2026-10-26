@@ -60,7 +60,12 @@ function downloadUrl(version, edition = 'redgate', platform = process.platform, 
     return `https://download.red-gate.com/maven/release/com/redgate/flyway/flyway-commandline/${version}/${filename}`;
   }
   if (edition === 'community') {
-    return `https://github.com/flyway/flyway/releases/download/flyway-${version}/${filename}`;
+    const [major, minor] = version.split('.').map(Number);
+    // Open Source CLI artifacts moved from Maven Central to GitHub Releases in 11.9.0.
+    if (major > 11 || (major === 11 && minor >= 9)) {
+      return `https://github.com/flyway/flyway/releases/download/flyway-${version}/${filename}`;
+    }
+    return `https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/${version}/${filename}`;
   }
   throw new Error('A edição deve ser redgate ou community.');
 }
