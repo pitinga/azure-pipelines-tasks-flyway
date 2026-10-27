@@ -12,7 +12,7 @@ steps:
 - task: FlywayCLI@1
   inputs:
     command: 'validate'
-    workingDirectory: '$(Build.SourcesDirectory)/database/sql'
+    # workingDirectory omitido: Flyway usa sua configuração padrão; adicione se quiser apontar explicitamente para pasta SQL
     url: '$(DbJdbcUrl)'
     user: '$(DbUser)'
     password: '$(DbPassword)'

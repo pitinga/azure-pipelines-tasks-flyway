@@ -31,12 +31,33 @@ async function resolveVersion(inputVersion) {
   console.log(`Versão estável latest do Flyway: ${version}`);
   return version;
 }
-async function exec(file, args) {
+async function exec(file, args, options = {}) {
   await new Promise((resolve, reject) => {
-    const child = spawn(file, args, { stdio: 'inherit', shell: false });
+    const child = spawn(file, args, { stdio: 'inherit', shell: false, ...options });
     child.once('error', reject);
     child.once('close', (code) => code === 0 ? resolve() : reject(new Error(`Falha ao executar ${path.basename(file)} (exit ${code}).`)));
   });
+}
+async function verifyInstalledFlyway(binary) {
+  // The version check runs with the pipeline's default working directory.
+  const directory = path.resolve(process.env.SYSTEM_DEFAULTWORKINGDIRECTORY ||
+    process.env.BUILD_SOURCESDIRECTORY || process.cwd());
+  if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
+    throw new Error('Diretório padrão do pipeline não encontrado para verificar flyway -v.');
+  }
+  let executable = binary;
+  let args = ['-v'];
+  if (process.platform === 'win32' && /\.(cmd|bat)$/i.test(binary)) {
+    // PowerShell executes Windows .cmd safely, without constructing shell arguments.
+    const script = `& '${binary.replace(/'/g, "''")}' -v; exit $LASTEXITCODE`;
+    executable = path.join(process.env.SystemRoot || 'C:\\Windows',
+      'System32','WindowsPowerShell','v1.0','powershell.exe');
+    args = ['-NoProfile','-NonInteractive','-EncodedCommand',
+      Buffer.from(script,'utf16le').toString('base64')];
+  }
+  console.log(`Testando instalação a partir de ${directory}: flyway -v`);
+  await exec(executable, args, { cwd: directory });
+  console.log('Verificação da versão do Flyway concluída.');
 }
 async function download(url, destination, redirects = 0) {
   if (redirects > 6) throw new Error('Limite de redirecionamentos excedido.');
@@ -116,9 +137,10 @@ async function run() {
   } else if (wantedHash) {
     console.warn('Pacote já em cache: SHA-256 informado somente é aplicado a novos downloads.');
   }
+  await verifyInstalledFlyway(binary);
   console.log(`##vso[task.prependpath]${path.dirname(binary)}`);
   console.log(`Flyway preparado: ${binary}`);
   return binary;
 }
 if (require.main === module) run().then(taskSuccess).catch(taskFail);
-module.exports = { run, download, extract, verifySha256, resolveVersion };
+module.exports = { run, download, extract, verifySha256, resolveVersion, verifyInstalledFlyway };

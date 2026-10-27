@@ -16,6 +16,6 @@ steps:
 - task: FlywayCLI@1
   inputs:
     command: 'validate'
-    workingDirectory: '$(Build.SourcesDirectory)/database/sql'
+    # workingDirectory omitido: configure flyway.locations no Secure File
     configFile: '$(flywaySecure.secureFilePath)'
 # Após validate, uma etapa FlywayCLI@1 com command: migrate pode ser habilitada com aprovações.

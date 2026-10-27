@@ -50,3 +50,35 @@ test('CLI refuses missing configuration file',()=>{
   assert.match(r.stdout+r.stderr,/configFile não é um arquivo acessível/);
  }finally{fs.rmSync(tmp,{recursive:true,force:true});}
 });
+
+
+test('CLI with both optional paths omitted preserves Flyway defaults and auto-discovery', {skip:process.platform==='win32'}, () => {
+  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'flyway-autoconfig-'));
+  try {
+    const file=path.join(tmp,'flyway'),result=path.join(tmp,'result.json');
+    fs.writeFileSync(path.join(tmp,'flyway.conf'),'flyway.locations=filesystem:sql\n');
+    fs.writeFileSync(file,'#!/usr/bin/env node\nrequire("node:fs").writeFileSync(process.env.FLYWAY_TEST_RESULT, JSON.stringify({cwd:process.cwd(),args:process.argv.slice(2), locations:process.env.FLYWAY_LOCATIONS,configFiles:process.env.FLYWAY_CONFIG_FILES}));\n');
+    fs.chmodSync(file,0o755);
+    const env={...process.env,INPUT_COMMAND:'validate',INPUT_FLYWAYPATH:file,
+      SYSTEM_DEFAULTWORKINGDIRECTORY:tmp,FLYWAY_TEST_RESULT:result};
+    delete env.INPUT_WORKINGDIRECTORY;
+    delete env.INPUT_CONFIGFILE;
+    delete env.FLYWAY_LOCATIONS;
+    delete env.FLYWAY_CONFIG_FILES;
+    const proc=spawnSync(process.execPath,[cli],{encoding:'utf8',env});
+    assert.equal(proc.status,0,proc.stdout+proc.stderr);
+    assert.deepEqual(JSON.parse(fs.readFileSync(result,'utf8')),{cwd:tmp,args:['validate']});
+  } finally {fs.rmSync(tmp,{recursive:true,force:true});}
+});
+test('Explicit workingDirectory preserves legacy migration location', {skip:process.platform==='win32'}, () => {
+ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'flyway-override-'));
+ try {
+  const binary=path.join(tmp,'flyway'),out=path.join(tmp,'out.json'),sql=path.join(tmp,'db');
+  fs.mkdirSync(sql);
+  fs.writeFileSync(binary,'#!/usr/bin/env node\nrequire("node:fs").writeFileSync(process.env.FLYWAY_TEST_RESULT, JSON.stringify({cwd:process.cwd(),locations:process.env.FLYWAY_LOCATIONS}));\n');
+  fs.chmodSync(binary,0o755);
+  const proc=spawnSync(process.execPath,[cli],{encoding:'utf8',env:{...process.env,INPUT_COMMAND:'info',INPUT_WORKINGDIRECTORY:sql,INPUT_FLYWAYPATH:binary,FLYWAY_TEST_RESULT:out}});
+  assert.equal(proc.status,0,proc.stdout+proc.stderr);
+  assert.deepEqual(JSON.parse(fs.readFileSync(out,'utf8')),{cwd:sql,locations:'filesystem:'+sql});
+ } finally {fs.rmSync(tmp,{recursive:true,force:true});}
+});

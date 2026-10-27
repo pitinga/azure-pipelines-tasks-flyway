@@ -1,0 +1,17 @@
+# Exemplo: flyway.conf/flyway.toml no diretório padrão do pipeline.
+# Configuração sem senhas no Git. No arquivo: flyway.locations=filesystem:database/sql
+trigger: none
+pool:
+  vmImage: ubuntu-latest
+steps:
+- checkout: self
+- task: FlywayInstaller@1
+  displayName: 'Instalar Flyway e executar flyway -v'
+  inputs:
+    flywayVersion: '13.11.1'
+- task: FlywayCLI@1
+  displayName: 'Validar usando flyway.conf ou flyway.toml automático'
+  inputs:
+    command: 'validate'
+    password: '$(DbPassword)' # Configure DbPassword como secret no pipeline
+    # workingDirectory e configFile omitidos intencionalmente
