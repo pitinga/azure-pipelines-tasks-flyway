@@ -8,6 +8,9 @@ on:
       - master
     paths-ignore:
       - '**/*.vsix'
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
 
 concurrency:
@@ -23,11 +26,12 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
+          package-manager-cache: false
       - name: Run tests
         run: npm test
       - name: Build tasks
@@ -54,13 +58,14 @@ jobs:
                   assert 'Node24' in task_info['execution']
               print(f'Verified package: {package}; {len(names)} entries')
       - name: Upload GitHub Actions artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: flyway-tasks-v1.1.4-vsix
           path: dist/*.vsix
           if-no-files-found: error
           retention-days: 90
       - name: Attach package to GitHub pre-release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
