@@ -82,3 +82,42 @@ test('Explicit workingDirectory preserves legacy migration location', {skip:proc
   assert.deepEqual(JSON.parse(fs.readFileSync(out,'utf8')),{cwd:sql,locations:'filesystem:'+sql});
  } finally {fs.rmSync(tmp,{recursive:true,force:true});}
 });
+
+
+test('CLI accepts blank, whitespace and quoted-empty optional paths without injecting Flyway settings',
+  { skip: process.platform === 'win32' }, () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'flyway-optional-'));
+  try {
+    const binary = path.join(tmp, 'flyway'), resultPath = path.join(tmp, 'result.json');
+    fs.writeFileSync(binary, '#!/usr/bin/env node\nrequire("node:fs").writeFileSync(process.env.FLYWAY_TEST_RESULT,JSON.stringify({args:process.argv.slice(2),configFiles:process.env.FLYWAY_CONFIG_FILES,locations:process.env.FLYWAY_LOCATIONS}));\n');
+    fs.chmodSync(binary, 0o755);
+    for (const value of ['', '  ', '""', "''"]) {
+      const env = { ...process.env, INPUT_COMMAND: 'validate', INPUT_CONFIGFILE: value,
+        INPUT_WORKINGDIRECTORY: value, INPUT_FLYWAYPATH: binary,
+        SYSTEM_DEFAULTWORKINGDIRECTORY: tmp, FLYWAY_TEST_RESULT: resultPath };
+      delete env.FLYWAY_LOCATIONS;
+      delete env.FLYWAY_CONFIG_FILES;
+      const proc = spawnSync(process.execPath, [cli], { encoding: 'utf8', env });
+      assert.equal(proc.status, 0, proc.stdout + proc.stderr);
+      assert.deepEqual(JSON.parse(fs.readFileSync(resultPath, 'utf8')), { args: ['validate'] });
+      assert.match(proc.stdout, /configFile=omitido/);
+      assert.match(proc.stdout, /workingDirectory=omitido/);
+    }
+  } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+});
+test('CLI detects unresolved configFile macro without exposing the supplied string',
+  { skip: process.platform === 'win32' }, () => {
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'flyway-unresolved-'));
+  try {
+    const binary = path.join(tmp, 'flyway');
+    fs.writeFileSync(binary, '#!/bin/sh\nexit 0\n');
+    fs.chmodSync(binary, 0o755);
+    const env = { ...process.env, INPUT_COMMAND: 'validate',
+      INPUT_CONFIGFILE: '$(notDefined.secureFilePath)', INPUT_FLYWAYPATH: binary,
+      SYSTEM_DEFAULTWORKINGDIRECTORY: tmp };
+    const proc = spawnSync(process.execPath, [cli], { encoding: 'utf8', env });
+    assert.equal(proc.status, 1);
+    assert.match(proc.stdout + proc.stderr, /variável .* não resolvida/);
+    assert.doesNotMatch(proc.stdout + proc.stderr, /notDefined/);
+  } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+});
