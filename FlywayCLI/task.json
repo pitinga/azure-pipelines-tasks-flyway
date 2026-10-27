@@ -40,17 +40,19 @@
     },
     {
       "name": "workingDirectory",
-      "type": "filePath",
+      "type": "string",
       "label": "Diretório das migrations (opcional)",
       "required": false,
-      "helpMarkDown": "Deixe vazio para executar no diretório padrão do pipeline e permitir que Flyway use as locations de flyway.conf/flyway.toml ou os defaults. Se preenchido, executa na pasta indicada e mantém o comportamento anterior: FLYWAY_LOCATIONS=filesystem:<pasta>, sobrepondo locations do arquivo."
+      "helpMarkDown": "Deixe vazio para executar no diretório padrão do pipeline e permitir que Flyway use as locations de flyway.conf/flyway.toml ou os defaults. Se preenchido, executa na pasta indicada e mantém o comportamento anterior: FLYWAY_LOCATIONS=filesystem:<pasta>, sobrepondo locations do arquivo.",
+      "defaultValue": ""
     },
     {
       "name": "configFile",
-      "type": "filePath",
+      "type": "string",
       "label": "Arquivo de configuração do Flyway (opcional)",
       "required": false,
-      "helpMarkDown": "Deixe vazio para Flyway localizar flyway.conf/flyway.toml na pasta padrão do pipeline ou outros diretórios de descoberta. Se usar DownloadSecureFile@1, informe $(flywaySecure.secureFilePath), pois o arquivo é baixado fora do diretório padrão."
+      "helpMarkDown": "Deixe vazio para Flyway localizar flyway.conf/flyway.toml na pasta padrão do pipeline ou outros diretórios de descoberta. Se usar DownloadSecureFile@1, informe $(flywaySecure.secureFilePath), pois o arquivo é baixado fora do diretório padrão.",
+      "defaultValue": ""
     },
     {
       "name": "url",
@@ -90,10 +92,11 @@
     },
     {
       "name": "flywayPath",
-      "type": "filePath",
+      "type": "string",
       "label": "Executável Flyway opcional",
       "required": false,
-      "helpMarkDown": "Caminho absoluto do flyway ou flyway.cmd. Em geral deixe vazio após FlywayInstaller@1."
+      "helpMarkDown": "Caminho absoluto do flyway ou flyway.cmd. Em geral deixe vazio após FlywayInstaller@1.",
+      "defaultValue": ""
     }
   ]
 }
