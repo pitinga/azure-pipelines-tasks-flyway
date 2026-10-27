@@ -12,7 +12,14 @@ test('manifest Node24 and IDs', () => {
  assert.equal(tasks.find(t=>t.name==='FlywayCLI').version.Patch,1);
  assert.equal(new Set(tasks.map(x=>x.id)).size,2);
  const cli = tasks.find(t=>t.name==='FlywayCLI');
- for (const input of ['configFile','workingDirectory']) assert.equal(cli.inputs.find(i=>i.name===input).required,false);
- assert.equal(cli.inputs.find(i=>i.name==='workingDirectory').defaultValue,undefined);
+ for (const name of ['configFile','workingDirectory','flywayPath']) {
+   const input = cli.inputs.find(i => i.name === name);
+   assert.ok(input, name);
+   assert.equal(input.required, false, name);
+   // filePath on Azure Pipelines may substitute repository root for an omitted input.
+   // A string with defaultValue='' preserves genuine omission.
+   assert.equal(input.type, 'string', name);
+   assert.equal(input.defaultValue, '', name);
+ }
  for (const task of tasks) {assert.ok(task.execution.Node24);assert.equal(task.minimumAgentVersion,'4.265.1');}
 });
