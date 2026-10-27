@@ -1,4 +1,4 @@
-# Flyway Tasks para Azure DevOps — v1.2.0
+# Flyway Tasks para Azure DevOps — v1.2.2
 
 Extensão independente para Azure DevOps Pipelines. Modernização do projeto MIT de Mathieu Filotto.
 

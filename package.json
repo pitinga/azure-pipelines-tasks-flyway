@@ -1,7 +1,7 @@
 {
   "name": "pitinga-database-migration-tasks",
   "private": true,
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Flyway tasks Node24 Azure Pipelines",
   "engines": {
     "node": ">=22"
