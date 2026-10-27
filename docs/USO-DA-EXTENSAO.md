@@ -125,6 +125,8 @@ Não coloque `password=` na própria URL. Configure driver, certificado confiáv
 - **clean** — pode remover objetos de schemas gerenciados; evite em PRD. Precisa `allowClean=true`, mas a configuração interna Flyway também pode bloquear.
 
 ## Diagnóstico
+**Inputs realmente opcionais (v1.2.1):** `configFile`, `workingDirectory` e `flywayPath` são declarados como `string`, com valor padrão `""`, para impedir a substituição implícita pela raiz do repositório associada ao tipo `filePath` no Azure Pipelines. Quando omitidos, a task executa o Flyway sem definir `FLYWAY_CONFIG_FILES` e `FLYWAY_LOCATIONS`; use apenas `command: 'validate'` para testar a descoberta automática de `flyway.conf` na raiz do checkout. Se um caminho for informado explicitamente, ele continua validado. O teste não confirma conectividade com o banco sem uma execução real no agente.
+
 
 Na v1.2.1, o log informa apenas se `configFile` e `workingDirectory` foram **informados** ou **omitidos**, sem revelar caminhos ou credenciais. Ausência, espaços e strings vazias entre aspas (`""`, `''`) não introduzem configurações no Flyway. Caminhos explicitamente inválidos continuam causando falha; macros `$(...)` não resolvidas geram mensagem específica.
 
