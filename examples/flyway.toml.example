@@ -1,4 +1,7 @@
 # Exemplo fictício. Não versione um arquivo com senha real.
+[flyway]
+locations = ["filesystem:database/sql"]
+
 [environments.default]
 url = "jdbc:postgresql://pg-qas.exemplo.local:5432/minha_base"
 user = "usuario_deploy"

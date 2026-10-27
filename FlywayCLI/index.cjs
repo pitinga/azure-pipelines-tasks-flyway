@@ -29,7 +29,11 @@ async function invoke(file, args, options) {
 
 async function run() {
   const command = commandAllowed(requiredInput('command'), boolInput('allowClean'));
-  const directory = path.resolve(getInput('workingDirectory', process.cwd()));
+  const explicitDirectory = getInput('workingDirectory').trim();
+  const directory = path.resolve(explicitDirectory ||
+    process.env.SYSTEM_DEFAULTWORKINGDIRECTORY ||
+    process.env.BUILD_SOURCESDIRECTORY ||
+    process.cwd());
   if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
     throw new Error(`Diretório de scripts inexistente: ${directory}`);
   }
@@ -45,7 +49,12 @@ async function run() {
     }
   }
   const args = validateOptions(parseOptions(getInput('commandOptions')));
-  const env = { ...process.env, FLYWAY_LOCATIONS: flywayLocation(directory) };
+  // Omitted workingDirectory: keep Flyway's own locations and auto-discovery.
+  const env = { ...process.env };
+  if (explicitDirectory) {
+    // Retain v1 behavior when users explicitly choose a migration SQL folder.
+    env.FLYWAY_LOCATIONS = flywayLocation(directory);
+  }
   if (configPath) {
     env.FLYWAY_CONFIG_FILES = configPath;
     console.log('Carregando Flyway configFile externo (conteúdo não exibido).');

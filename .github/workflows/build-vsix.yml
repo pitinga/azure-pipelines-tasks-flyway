@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/modernize-node24-v1
+      - feature/optional-cli-config-installer-version
       - fix/overview-link-v1.1.4
       - master
     paths-ignore:
@@ -60,7 +61,7 @@ jobs:
       - name: Upload GitHub Actions artifact
         uses: actions/upload-artifact@v6
         with:
-          name: flyway-tasks-v1.1.4-vsix
+          name: flyway-tasks-v1.2.0-vsix
           path: dist/*.vsix
           if-no-files-found: error
           retention-days: 90
@@ -70,8 +71,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PACKAGE=$(find dist -maxdepth 1 -name '*.vsix' -print -quit)
-          if gh release view v1.1.4-rc1 >/dev/null 2>&1; then
-            gh release upload v1.1.4-rc1 "$PACKAGE" --clobber
+          if gh release view v1.2.0-rc1 >/dev/null 2>&1; then
+            gh release upload v1.2.0-rc1 "$PACKAGE" --clobber
           else
-            gh release create v1.1.4-rc1 "$PACKAGE" --target "$GITHUB_SHA" --prerelease --title "Flyway Tasks 1.1.4 (pré-lançamento)" --notes "Extensão Azure DevOps em teste. VSIX criado com tfx-cli e validado no GitHub Actions. Não publicado no Marketplace."
+            gh release create v1.2.0-rc1 "$PACKAGE" --target "$GITHUB_SHA" --prerelease --title "Flyway Tasks 1.2.0 (pré-lançamento)" --notes "Extensão Azure DevOps em teste. VSIX criado com tfx-cli e validado no GitHub Actions. Não publicado no Marketplace."
           fi
