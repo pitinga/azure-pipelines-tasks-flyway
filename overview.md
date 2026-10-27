@@ -1,4 +1,4 @@
-# Flyway - Database Migration Tasks (v1.2.0)
+# Flyway - Database Migration Tasks (v1.2.1)
 
 **Duas tasks modernas (Node24):**
 - `FlywayInstaller@1`: instala a última versão estável `latest` ou versão exata, nas edições Redgate/Community, e executa `flyway -v` no diretório padrão do pipeline para mostrar e verificar a versão.
