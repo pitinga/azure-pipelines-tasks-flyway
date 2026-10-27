@@ -5,6 +5,16 @@ function getInput(name, fallback = '') {
   const key = `INPUT_${name.replace(/[^A-Za-z0-9]/g, '_').toUpperCase()}`;
   return Object.hasOwn(process.env, key) ? process.env[key] : fallback;
 }
+// Optional filePath inputs may be blank or quoted-empty in pipeline templates.
+function optionalPathInput(name) {
+  let value = getInput(name, '').trim();
+  if (value.length >= 2 &&
+      ((value[0] === '"' && value.endsWith('"')) ||
+       (value[0] === "'" && value.endsWith("'")))) {
+    value = value.slice(1, -1).trim();
+  }
+  return value;
+}
 function requiredInput(name) {
   const value = getInput(name);
   if (!value || !value.trim()) throw new Error(`O parâmetro '${name}' é obrigatório.`);
@@ -118,6 +128,6 @@ function findOnPath(name, envPath = process.env.PATH || '', platform = process.p
   }
   return '';
 }
-module.exports = { getInput, requiredInput, boolInput, escapeLogging, taskFail, taskSuccess,
+module.exports = { getInput, optionalPathInput, requiredInput, boolInput, escapeLogging, taskFail, taskSuccess,
   versionCheck, releaseVersion, target, downloadUrl, parseOptions, validateOptions, flywayLocation,
   commandAllowed, findOnPath };
