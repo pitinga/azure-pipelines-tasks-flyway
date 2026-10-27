@@ -72,7 +72,7 @@ jobs:
         run: |
           PACKAGE=$(find dist -maxdepth 1 -name '*.vsix' -print -quit)
           if gh release view v1.2.0-rc1 >/dev/null 2>&1; then
-            gh release upload v1.1.4-rc1 "$PACKAGE" --clobber
+            gh release upload v1.2.0-rc1 "$PACKAGE" --clobber
           else
-            gh release create v1.1.4-rc1 "$PACKAGE" --target "$GITHUB_SHA" --prerelease --title "Flyway Tasks 1.2.0 (pré-lançamento)" --notes "Extensão Azure DevOps em teste. VSIX criado com tfx-cli e validado no GitHub Actions. Não publicado no Marketplace."
+            gh release create v1.2.0-rc1 "$PACKAGE" --target "$GITHUB_SHA" --prerelease --title "Flyway Tasks 1.2.0 (pré-lançamento)" --notes "Extensão Azure DevOps em teste. VSIX criado com tfx-cli e validado no GitHub Actions. Não publicado no Marketplace."
           fi
