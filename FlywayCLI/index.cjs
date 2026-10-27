@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const { spawn } = require('node:child_process');
-const { getInput, requiredInput, boolInput, taskFail, taskSuccess, parseOptions,
+const { getInput, optionalPathInput, requiredInput, boolInput, taskFail, taskSuccess, parseOptions,
   validateOptions, flywayLocation, commandAllowed, findOnPath } = require(require('node:fs').existsSync(require('node:path').join(__dirname, 'runtime.cjs')) ? './runtime.cjs' : '../shared/runtime.cjs');
 
 async function invoke(file, args, options) {
@@ -29,7 +29,7 @@ async function invoke(file, args, options) {
 
 async function run() {
   const command = commandAllowed(requiredInput('command'), boolInput('allowClean'));
-  const explicitDirectory = getInput('workingDirectory').trim();
+  const explicitDirectory = optionalPathInput('workingDirectory');
   const directory = path.resolve(explicitDirectory ||
     process.env.SYSTEM_DEFAULTWORKINGDIRECTORY ||
     process.env.BUILD_SOURCESDIRECTORY ||
@@ -37,15 +37,22 @@ async function run() {
   if (!fs.existsSync(directory) || !fs.statSync(directory).isDirectory()) {
     throw new Error(`Diretório de scripts inexistente: ${directory}`);
   }
-  const supplied = getInput('flywayPath');
+  const supplied = optionalPathInput('flywayPath');
   const executable = supplied || findOnPath('flyway');
   if (!executable || !fs.existsSync(executable)) throw new Error('Flyway não encontrado. Execute a task FlywayInstaller antes de FlywayCLI ou configure flywayPath.');
-  const configFile = getInput('configFile').trim();
+  const configFile = optionalPathInput('configFile');
+  // Never print configuration paths or credentials.
+  console.log('Flyway CLI: workingDirectory=' +
+    (explicitDirectory ? 'informado' : 'omitido') +
+    '; configFile=' + (configFile ? 'informado' : 'omitido') + '.');
   let configPath = '';
   if (configFile) {
+    if (/^\$\([^)]+\)$/.test(configFile)) {
+      throw new Error('configFile recebeu uma variável $(...) não resolvida pelo Azure Pipelines. Confira o nome da saída do DownloadSecureFile@1.');
+    }
     configPath = path.resolve(configFile);
     if (!fs.existsSync(configPath) || !fs.statSync(configPath).isFile()) {
-      throw new Error('configFile não é um arquivo acessível. Utilize $(nomeDaTask.secureFilePath) após DownloadSecureFile@1.');
+      throw new Error('configFile não é um arquivo acessível (a task recebeu valor não vazio). Utilize $(nomeDaTask.secureFilePath) após DownloadSecureFile@1 ou omita este input.');
     }
   }
   const args = validateOptions(parseOptions(getInput('commandOptions')));
