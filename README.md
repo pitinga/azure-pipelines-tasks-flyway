@@ -71,7 +71,7 @@ O Secure File é removido automaticamente ao finalizar o job pela task Microsoft
 
 ## Testes e VSIX
 
-Requer Node >=22 localmente e Azure Pipelines Agent >=4.265.1 com executor Node24.
+Requer **Node.js >=24** para desenvolvimento/build local e **Azure Pipelines Agent >=4.265.1**, usando exclusivamente o executor `Node24`. Os workflows do GitHub Actions utilizam Actions v7 com Node 24.
 
 ```powershell
 npm run test

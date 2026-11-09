@@ -27,12 +27,14 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout source
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
       - name: Install Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Verify Node 24 runtime
+        run: node -e "if (process.versions.node.split('.')[0] !== '24') process.exit(1); console.log('Node ' + process.version)"
       - name: Run tests
         run: npm test
       - name: Build tasks
@@ -56,10 +58,11 @@ jobs:
                   assert f'{task}/index.cjs' in names, task
                   assert f'{task}/runtime.cjs' in names, task
                   task_info = json.loads(archive.read(f'{task}/task.json'))
-                  assert 'Node24' in task_info['execution']
+                  assert list(task_info['execution']) == ['Node24'], task_info['execution']
+                  assert task_info['minimumAgentVersion'] == '4.265.1'
               print(f'Verified package: {package}; {len(names)} entries')
       - name: Upload GitHub Actions artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: flyway-tasks-v1.2.2-vsix
           path: dist/*.vsix

@@ -23,12 +23,14 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout approved release
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
       - name: Setup Node 24
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Verify Node 24 runtime
+        run: node -e "if (process.versions.node.split('.')[0] !== '24') process.exit(1); console.log('Node ' + process.version)"
       - name: Test and build
         run: |
           npm test
@@ -44,6 +46,10 @@ jobs:
           with zipfile.ZipFile(packages[0]) as z:
               for name in ('extension.vsixmanifest', 'extension.vsomanifest', 'FlywayInstaller/task.json', 'FlywayCLI/task.json'):
                   assert name in z.namelist(), f'Missing {name}'
+              for task in ('FlywayInstaller', 'FlywayCLI'):
+                  spec = json.loads(z.read(f'{task}/task.json'))
+                  assert list(spec['execution']) == ['Node24']
+                  assert spec['minimumAgentVersion'] == '4.265.1'
               manifest = json.load(open('vss-extension.json'))
               assert manifest['publisher'] == 'pitinga'
               assert manifest['id'] == 'pitinga-database-migration-tasks'

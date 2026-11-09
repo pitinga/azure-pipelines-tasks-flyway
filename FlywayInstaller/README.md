@@ -1,6 +1,6 @@
 # FlywayInstaller@1 — documentação atual
 
-A implementação executada pela task encontra-se em [index.cjs](index.cjs). Os arquivos TypeScript antigos continuam no repositório apenas como referência histórica.
+A implementação executada pela task encontra-se em [index.cjs](index.cjs). Os arquivos TypeScript antigos continuam no repositório apenas como referência histórica, sem participação no build Node 24. Os manifestos npm legados foram removidos para evitar dependências obsoletas.
 
 A instalação usa `latest` (último release estável) por padrão ou permite uma versão fixa, por exemplo `13.11.1`. Escolha a distribuição `redgate` ou `community`.
 
