@@ -95,3 +95,7 @@ O manifesto utiliza o publisher `pitinga`. O pacote gerado no GitHub Releases é
 Após a publicação bem-sucedida no Marketplace, o workflow [publish-marketplace.yml](.github/workflows/publish-marketplace.yml) confirma a tag `vX.Y.Z`, anexa o VSIX e publica a GitHub Release. A versão `1.2.2` já possui tag e release em rascunho; o workflow usa o commit da tag para garantir correspondência com o pacote publicado. Também é possível registrar uma draft de forma independente pelo workflow [release.yml](.github/workflows/release.yml) a partir de um run aprovado e, depois de confirmar a publicação manual no Marketplace, usar a opção `publish` com a confirmação `PUBLICADO`. Não mova tags existentes.
 
 A workflow de build publica o artifact GitHub Actions com nome variável de acordo com a versão do manifesto, evitando pré-releases antigas contendo pacotes de versões novas. A release definitiva só se torna pública após confirmação do Marketplace.
+
+## Branch principal
+
+A branch principal do projeto é `main`. Novos pull requests, builds de validação e o fluxo de publicação no Marketplace utilizam `main`. As tags de versões anteriores permanecem imutáveis, incluindo `v1.2.2`.

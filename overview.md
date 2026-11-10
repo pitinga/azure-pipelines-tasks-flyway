@@ -24,6 +24,6 @@
 ```
 
 **Documentação de todos os parâmetros, exemplos e segurança:**
-https://github.com/pitinga/azure-pipelines-tasks-flyway/blob/master/docs/USO-DA-EXTENSAO.md
+https://github.com/pitinga/azure-pipelines-tasks-flyway/blob/main/docs/USO-DA-EXTENSAO.md
 
 Fixe a versão do Flyway em PRD para garantir releases reprodutíveis. Requer Azure Pipelines Agent >=4.265.1 (Node24).

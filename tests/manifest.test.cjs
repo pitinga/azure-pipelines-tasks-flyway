@@ -63,3 +63,19 @@ test('Flyway versioned build artifacts and release workflow stay compatible',()=
  assert.doesNotMatch(build,/v1\.2\.2-rc1/);
  assert.match(release,/flyway-tasks-v\$VERSION-vsix/);
 });
+
+test('Fluxos de CI e publicacao padronizados na branch main',()=>{
+ for(const name of ['build-vsix.yml','publish-marketplace.yml','release.yml']) {
+  const workflow=fs.readFileSync(path.join(root,'.github/workflows',name),'utf8');
+  assert.doesNotMatch(workflow,/refs\/heads\/master|branches: \[master\]|^\s+- master$/m,name);
+ }
+ const build=fs.readFileSync(path.join(root,'.github/workflows','build-vsix.yml'),'utf8');
+ assert.match(build,/push:\n\s+branches:\n\s+- main/);
+ assert.match(build,/pull_request:\n\s+branches:\n\s+- main/);
+ const release=fs.readFileSync(path.join(root,'.github/workflows','release.yml'),'utf8');
+ assert.match(release,/branches: \[main\]/);
+ const publish=fs.readFileSync(path.join(root,'.github/workflows','publish-marketplace.yml'),'utf8');
+ assert.match(publish,/refs\/heads\/main/);
+ const overview=fs.readFileSync(path.join(root,'overview.md'),'utf8');
+ assert.doesNotMatch(overview,/blob\/master\//);
+});

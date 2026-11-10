@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   publish:
-    if: github.ref == 'refs/heads/master' && inputs.confirmation == 'PUBLICAR'
+    if: github.ref == 'refs/heads/main' && inputs.confirmation == 'PUBLICAR'
     runs-on: ubuntu-latest
     environment: marketplace-production
     timeout-minutes: 20
