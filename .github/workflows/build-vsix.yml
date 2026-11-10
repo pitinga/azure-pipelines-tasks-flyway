@@ -63,7 +63,7 @@ jobs:
               print(f'Verified package: {package}; {len(names)} entries')
       - name: Read extension version
         id: ext-version
-        run: echo "version=$(node -p 'require(\"./vss-extension.json\").version')" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(node -p 'require("./vss-extension.json").version')" >> "$GITHUB_OUTPUT"
       - name: Upload GitHub Actions artifact
         uses: actions/upload-artifact@v7
         with:
