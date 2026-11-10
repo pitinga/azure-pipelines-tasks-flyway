@@ -61,21 +61,13 @@ jobs:
                   assert list(task_info['execution']) == ['Node24'], task_info['execution']
                   assert task_info['minimumAgentVersion'] == '4.265.1'
               print(f'Verified package: {package}; {len(names)} entries')
+      - name: Read extension version
+        id: ext-version
+        run: echo "version=$(node -p 'require(\"./vss-extension.json\").version')" >> "$GITHUB_OUTPUT"
       - name: Upload GitHub Actions artifact
         uses: actions/upload-artifact@v7
         with:
-          name: flyway-tasks-v1.2.2-vsix
+          name: flyway-tasks-v${{ steps.ext-version.outputs.version }}-vsix
           path: dist/*.vsix
           if-no-files-found: error
           retention-days: 90
-      - name: Attach package to GitHub pre-release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PACKAGE=$(find dist -maxdepth 1 -name '*.vsix' -print -quit)
-          if gh release view v1.2.2-rc1 >/dev/null 2>&1; then
-            gh release upload v1.2.2-rc1 "$PACKAGE" --clobber
-          else
-            gh release create v1.2.2-rc1 "$PACKAGE" --target "$GITHUB_SHA" --prerelease --title "Flyway Tasks 1.2.2 (pré-lançamento)" --notes "Extensão Azure DevOps em teste. VSIX criado com tfx-cli e validado no GitHub Actions. Não publicado no Marketplace."
-          fi

@@ -119,7 +119,7 @@ jobs:
             exit 1
           fi
           mkdir -p release-assets
-          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "flyway-tasks-v1.2.2-vsix" --dir release-assets
+          gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "flyway-tasks-v$VERSION-vsix" --dir release-assets
           count=$(find release-assets -type f -name '*.vsix' | wc -l)
           package=$(find release-assets -type f -name '*.vsix' -print -quit)
           if [[ "$count" -ne 1 || "$(basename "$package")" != *"-$VERSION.vsix" ]]; then

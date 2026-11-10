@@ -54,3 +54,12 @@ test('Marketplace publish finalizes stable GitHub release only after the upload'
  assert.match(workflow.slice(release),/gh release create/);
  assert.match(workflow,/VS_MARKETPLACE_TOKEN/);
 });
+
+test('Flyway versioned build artifacts and release workflow stay compatible',()=>{
+ const build=fs.readFileSync(path.join(root,'.github/workflows/build-vsix.yml'),'utf8');
+ const release=fs.readFileSync(path.join(root,'.github/workflows/release.yml'),'utf8');
+ assert.match(build,/id: ext-version/);
+ assert.match(build,/steps.ext-version.outputs.version/);
+ assert.doesNotMatch(build,/v1\.2\.2-rc1/);
+ assert.match(release,/flyway-tasks-v\$VERSION-vsix/);
+});
