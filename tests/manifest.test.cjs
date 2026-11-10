@@ -41,3 +41,16 @@ test('GitHub Actions usam somente runtime Node 24 e Actions v7', () => {
    assert.equal(fs.existsSync(path.join(root,name,'package.json')),false, name);
  }
 });
+
+test('Marketplace publish finalizes stable GitHub release only after the upload',()=>{
+ const workflow=fs.readFileSync(path.join(root,'.github/workflows/publish-marketplace.yml'),'utf8');
+ assert.match(workflow,/permissions:\n  contents: write/);
+ assert.match(workflow,/fetch-depth: 0/);
+ assert.match(workflow,/Use previously verified release tag when present/);
+ const publish=workflow.indexOf('      - name: Publish to Marketplace');
+ const release=workflow.indexOf('      - name: Register published version on GitHub');
+ assert.ok(publish>0 && release>publish);
+ assert.match(workflow.slice(release),/gh release edit .*--draft=false/);
+ assert.match(workflow.slice(release),/gh release create/);
+ assert.match(workflow,/VS_MARKETPLACE_TOKEN/);
+});

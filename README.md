@@ -89,3 +89,7 @@ O manifesto utiliza o publisher `pitinga`. O pacote gerado no GitHub Releases é
 - [Arquivo flyway.conf de exemplo](examples/flyway.conf.example)
 - [Arquivo flyway.toml de exemplo](examples/flyway.toml.example)
 - [Guia completo: todos os inputs e solução de problemas](docs/USO-DA-EXTENSAO.md)
+
+## Versionamento e GitHub Releases
+
+Após a publicação bem-sucedida no Marketplace, o workflow [publish-marketplace.yml](.github/workflows/publish-marketplace.yml) confirma a tag `vX.Y.Z`, anexa o VSIX e publica a GitHub Release. A versão `1.2.2` já possui tag e release em rascunho; o workflow usa o commit da tag para garantir correspondência com o pacote publicado. Também é possível registrar uma draft de forma independente pelo workflow [release.yml](.github/workflows/release.yml) a partir de um run aprovado e, depois de confirmar a publicação manual no Marketplace, usar a opção `publish` com a confirmação `PUBLICADO`. Não mova tags existentes.

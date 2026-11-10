@@ -9,7 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: flyway-marketplace-production
@@ -24,6 +24,27 @@ jobs:
     steps:
       - name: Checkout approved release
         uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Use previously verified release tag when present
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(python3 -c 'import json; print(json.load(open("vss-extension.json"))["version"])')
+          tag="v$version"
+          if sha=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq '.object.sha' 2>/dev/null); then
+            git checkout --detach "$sha"
+            actual=$(python3 -c 'import json; print(json.load(open("vss-extension.json"))["version"])')
+            if [[ "$actual" != "$version" ]]; then
+              echo "::error::Tag $tag aponta para versao diferente."
+              exit 1
+            fi
+            echo "Publicando exatamente o codigo da tag $tag ($sha)."
+          else
+            echo "Tag $tag ainda nao existe; sera criada apos publicacao bem-sucedida."
+          fi
       - name: Setup Node 24
         uses: actions/setup-node@v7
         with:
@@ -75,3 +96,29 @@ jobs:
             --vsix "${packages[0]}" \
             --auth-type pat \
             --token "$VS_MARKETPLACE_TOKEN"
+      - name: Register published version on GitHub
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version=$(python3 -c 'import json; print(json.load(open("vss-extension.json"))["version"])')
+          tag="v$version"
+          sha=$(git rev-parse HEAD)
+          package=$(find dist -maxdepth 1 -type f -name '*.vsix' -print -quit)
+          test -n "$package"
+          if existing=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/$tag" --jq '.object.sha' 2>/dev/null); then
+            if [[ "$existing" != "$sha" ]]; then
+              echo "::error::A tag $tag ja aponta para $existing e nao sera movida."
+              exit 1
+            fi
+          else
+            gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" -f "ref=refs/tags/$tag" -f "sha=$sha" >/dev/null
+          fi
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$tag" "$package" --repo "$GITHUB_REPOSITORY" --clobber
+            gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          else
+            gh release create "$tag" "$package" --repo "$GITHUB_REPOSITORY" --target "$sha" --title "Flyway Tasks $version" --generate-notes --latest
+          fi
+          echo "Marketplace publicado e GitHub Release $tag concluida."
