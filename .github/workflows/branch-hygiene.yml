@@ -23,6 +23,7 @@ jobs:
           TOKEN = os.environ["GH_TOKEN"]
           EVENT = os.environ["GITHUB_EVENT_NAME"]
           DEFAULT = "main"
+REVIEWED_LEGACY = {"master":"4239cf165c2334ff85cacc1f919565ac0f791f6c"}
           BASE = "https://api.github.com"
           def api(method, path):
               req=urllib.request.Request(BASE+path,method=method,headers={
@@ -70,7 +71,13 @@ jobs:
               merged={(x.get("head") or {}).get("ref"):(x.get("head") or {}).get("sha") for x in prs if x.get("merged_at") and ((x.get("head") or {}).get("repo") or {}).get("full_name")==REPO and (x.get("base") or {}).get("ref")==DEFAULT}
               for b in branches:
                 name=b["name"]; sha=b["commit"]["sha"]
-                if name in (DEFAULT,"master") or b.get("protected"): continue
+                if name == DEFAULT or b.get("protected"): continue
+      if name == "master":
+        if REVIEWED_LEGACY.get(name) == sha:
+          comparison = api("GET",f"/repos/{REPO}/compare/{DEFAULT}...master")
+          if comparison and comparison.get("ahead_by") == 0:
+            remove(name,sha,"legacy master verified fully contained in main")
+        continue
                 if merged.get(name)==sha:
                   remove(name,sha,"merged PR verified by head SHA")
                   continue
