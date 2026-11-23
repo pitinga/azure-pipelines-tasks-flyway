@@ -72,12 +72,12 @@ REVIEWED_LEGACY = {"master":"4239cf165c2334ff85cacc1f919565ac0f791f6c"}
               for b in branches:
                 name=b["name"]; sha=b["commit"]["sha"]
                 if name == DEFAULT or b.get("protected"): continue
-      if name == "master":
-        if REVIEWED_LEGACY.get(name) == sha:
-          comparison = api("GET",f"/repos/{REPO}/compare/{DEFAULT}...master")
-          if comparison and comparison.get("ahead_by") == 0:
-            remove(name,sha,"legacy master verified fully contained in main")
-        continue
+                if name == "master":
+                  if REVIEWED_LEGACY.get(name) == sha:
+                    comparison = api("GET",f"/repos/{REPO}/compare/{DEFAULT}...master")
+                    if comparison and comparison.get("ahead_by") == 0:
+                      remove(name,sha,"legacy master verified fully contained in main")
+                  continue
                 if merged.get(name)==sha:
                   remove(name,sha,"merged PR verified by head SHA")
                   continue
