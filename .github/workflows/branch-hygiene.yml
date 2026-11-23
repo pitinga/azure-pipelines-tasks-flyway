@@ -23,7 +23,7 @@ jobs:
           TOKEN = os.environ["GH_TOKEN"]
           EVENT = os.environ["GITHUB_EVENT_NAME"]
           DEFAULT = "main"
-REVIEWED_LEGACY = {"master":"4239cf165c2334ff85cacc1f919565ac0f791f6c"}
+          REVIEWED_LEGACY = {"master":"4239cf165c2334ff85cacc1f919565ac0f791f6c"}
           BASE = "https://api.github.com"
           def api(method, path):
               req=urllib.request.Request(BASE+path,method=method,headers={
