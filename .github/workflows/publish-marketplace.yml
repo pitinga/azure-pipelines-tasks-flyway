@@ -71,6 +71,9 @@ jobs:
                   spec = json.loads(z.read(f'{task}/task.json'))
                   assert list(spec['execution']) == ['Node24']
                   assert spec['minimumAgentVersion'] == '4.265.1'
+              assert 'LICENSE' in z.namelist(), 'LICENSE ausente no VSIX'
+              assert z.read('LICENSE') == open('LICENSE','rb').read(), 'VSIX não contém a licença do repositório'
+              assert 'Microsoft.VisualStudio.Services.Content.License' in z.read('extension.vsixmanifest').decode('utf-8')
               manifest = json.load(open('vss-extension.json'))
               assert manifest['publisher'] == 'pitinga'
               assert manifest['id'] == 'pitinga-database-migration-tasks'

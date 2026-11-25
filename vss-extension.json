@@ -2,7 +2,7 @@
   "manifestVersion": 1,
   "id": "pitinga-database-migration-tasks",
   "name": "Flyway - Database Migration Tasks",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "publisher": "pitinga",
   "targets": [
     {
@@ -32,11 +32,18 @@
     {
       "path": "overview.md",
       "addressable": true
+    },
+    {
+      "path": "LICENSE",
+      "addressable": true
     }
   ],
   "content": {
     "details": {
       "path": "overview.md"
+    },
+    "license": {
+      "path": "LICENSE"
     }
   },
   "galleryFlags": [

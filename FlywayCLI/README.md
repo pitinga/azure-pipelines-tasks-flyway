@@ -1,6 +1,6 @@
 # FlywayCLI@1 — documentação atual
 
-A implementação utilizada na extensão está em [index.cjs](index.cjs). Os arquivos `src/*.ts` antigos estão preservados apenas para referência histórica; os manifestos npm legados não fazem parte do build e foram removidos.
+A implementação utilizada na extensão está em [index.cjs](index.cjs). Os arquivos TypeScript legados, não utilizados no build Node 24, foram removidos. O histórico permanece disponível no Git.
 
 Documentação de **todos os parâmetros**: [Guia completo Flyway](../docs/USO-DA-EXTENSAO.md).
 

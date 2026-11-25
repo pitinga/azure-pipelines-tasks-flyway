@@ -50,6 +50,9 @@ jobs:
               assert 'extension.vsixmanifest' in names
               assert 'extension.vsomanifest' in names
               assert '[Content_Types].xml' in names
+              assert 'LICENSE' in names, 'MIT LICENSE ausente no pacote VSIX'
+              assert archive.read('LICENSE') == open('LICENSE','rb').read(), 'Licenca do VSIX diferente do repositorio'
+              assert 'Microsoft.VisualStudio.Services.Content.License' in archive.read('extension.vsixmanifest').decode('utf-8'), 'Asset de licença não registrado'
               for task in ['FlywayCLI','FlywayInstaller']:
                   assert f'{task}/task.json' in names, task
                   assert f'{task}/index.cjs' in names, task

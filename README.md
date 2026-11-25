@@ -1,6 +1,6 @@
-# Flyway Tasks para Azure DevOps — v1.2.2
+# Flyway Tasks para Azure DevOps — v1.2.3
 
-Extensão independente para Azure DevOps Pipelines. Modernização do projeto MIT de Mathieu Filotto.
+Extensão independente para Azure DevOps Pipelines. O código executável atual foi reimplementado em JavaScript/Node24, tomando como ponto de partida o projeto MIT de Mathieu Filotto. O código TypeScript legado foi removido; a atribuição original é preservada na licença.
 
 > **Leia o [Guia completo do usuário](docs/USO-DA-EXTENSAO.md):** documentação de todos os parâmetros, exemplos JDBC, senhas, Secure Files, versionamento e troubleshooting.
 
@@ -99,3 +99,7 @@ A workflow de build publica o artifact GitHub Actions com nome variável de acor
 ## Branch principal
 
 A branch principal do projeto é `main`. Novos pull requests, builds de validação e o fluxo de publicação no Marketplace utilizam `main`. As tags de versões anteriores permanecem imutáveis, incluindo `v1.2.2`.
+
+### Integridade do pacote 1.2.3
+
+O VSIX inclui explicitamente o arquivo `LICENSE` (MIT, incluindo a atribuição ao projeto de Mathieu Filotto) e o CI verifica os bytes da licença empacotada. A versão 1.2.3 é uma preparação técnica e **não foi enviada ao Marketplace**; a extensão 1.2.2 continua `Unpublished & Locked` até decisão da Microsoft.

@@ -6,7 +6,7 @@ test('manifest Node24 and IDs', () => {
  const manifest=require('../vss-extension.json');
  const tasks=['FlywayInstaller','FlywayCLI'].map(x=>JSON.parse(fs.readFileSync(path.join(root,x,'task.json'))));
  assert.equal(manifest.publisher,'pitinga');
- assert.equal(manifest.version,'1.2.2');
+ assert.equal(manifest.version,'1.2.3');
  assert.equal(tasks.find(t=>t.name==='FlywayInstaller').version.Minor,2);
  assert.equal(tasks.find(t=>t.name==='FlywayCLI').version.Minor,2);
  assert.equal(tasks.find(t=>t.name==='FlywayCLI').version.Patch,1);
@@ -78,4 +78,24 @@ test('Fluxos de CI e publicacao padronizados na branch main',()=>{
  assert.match(publish,/refs\/heads\/main/);
  const overview=fs.readFileSync(path.join(root,'overview.md'),'utf8');
  assert.doesNotMatch(overview,/blob\/master\//);
+});
+
+
+test('MIT license é arquivo explícito, endereçável e preserva atribuição original',()=>{
+ const manifest=require('../vss-extension.json');
+ assert.equal(manifest.content.license.path,'LICENSE');
+ assert.ok(manifest.files.some(f=>f.path==='LICENSE'&&f.addressable===true));
+ assert.equal(require('../package.json').version,manifest.version);
+ const license=fs.readFileSync(path.join(root,'LICENSE'),'utf8');
+ assert.match(license,/Copyright \(c\) 2020 Mathieu Filotto/);
+ assert.match(license,/MIT License/);
+ const build=fs.readFileSync(path.join(root,'.github/workflows/build-vsix.yml'),'utf8');
+ const publish=fs.readFileSync(path.join(root,'.github/workflows/publish-marketplace.yml'),'utf8');
+ assert.match(build,/archive.read\('LICENSE'\)/);
+ assert.match(publish,/z.read\('LICENSE'\)/);
+});
+
+test('Legado TypeScript e arquivos de build obsoletos foram removidos',()=>{
+ for(const name of ['FlywayInstaller/src','FlywayCLI/src','FlywayInstaller/tsconfig.json','FlywayCLI/tsconfig.json','FlywayInstaller/.env-sample','FlywayCLI/.env-sample','FlywayInstaller/icon.png','FlywayCLI/icon.png','vss-extension-icon.png'])
+  assert.equal(fs.existsSync(path.join(root,name)),false,name);
 });
