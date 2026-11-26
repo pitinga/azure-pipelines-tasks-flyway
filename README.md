@@ -92,9 +92,9 @@ O manifesto utiliza o publisher `pitinga`. O pacote gerado no GitHub Releases é
 
 ## Versionamento e GitHub Releases
 
-Após a publicação bem-sucedida no Marketplace, o workflow [publish-marketplace.yml](.github/workflows/publish-marketplace.yml) confirma a tag `vX.Y.Z`, anexa o VSIX e publica a GitHub Release. A versão `1.2.2` já possui tag e release em rascunho; o workflow usa o commit da tag para garantir correspondência com o pacote publicado. Também é possível registrar uma draft de forma independente pelo workflow [release.yml](.github/workflows/release.yml) a partir de um run aprovado e, depois de confirmar a publicação manual no Marketplace, usar a opção `publish` com a confirmação `PUBLICADO`. Não mova tags existentes.
+O GitHub Release e independente do Marketplace: `github-release.yml` exige CI aprovado, usa o VSIX validado e cria tag imutavel `vX.Y.Z` e release publica. O Marketplace sera tratado separadamente; tags e releases historicas nao sao modificadas.
 
-A workflow de build publica o artifact GitHub Actions com nome variável de acordo com a versão do manifesto, evitando pré-releases antigas contendo pacotes de versões novas. A release definitiva só se torna pública após confirmação do Marketplace.
+A workflow de build publica o artifact GitHub Actions com nome variável de acordo com a versão do manifesto, evitando pré-releases antigas contendo pacotes de versões novas. GitHub Releases podem ser publicas mesmo sem disponibilidade no Marketplace.
 
 ## Branch principal
 
@@ -103,3 +103,7 @@ A branch principal do projeto é `main`. Novos pull requests, builds de validaç
 ### Integridade do pacote 1.2.3
 
 O VSIX inclui explicitamente o arquivo `LICENSE` (MIT, incluindo a atribuição ao projeto de Mathieu Filotto) e o CI verifica os bytes da licença empacotada. A versão 1.2.3 é uma preparação técnica e **não foi enviada ao Marketplace**; a extensão 1.2.2 continua `Unpublished & Locked` até decisão da Microsoft.
+
+## GitHub Releases padronizadas
+
+O workflow `.github/workflows/github-release.yml` e independente do Marketplace. Apos CI aprovado na `main`, valida o SHA, a identidade e a licenca do VSIX e publica uma GitHub Release publica (nem draft nem pre-release), com tag `vX.Y.Z` imutavel e VSIX anexado. Reexecucoes preservam releases existentes. O fluxo de Marketplace permanece manual, separado. Historico anterior preservado.
