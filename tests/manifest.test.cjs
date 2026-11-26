@@ -42,44 +42,38 @@ test('GitHub Actions usam somente runtime Node 24 e Actions v7', () => {
  }
 });
 
-test('Marketplace publish finalizes stable GitHub release only after the upload',()=>{
- const workflow=fs.readFileSync(path.join(root,'.github/workflows/publish-marketplace.yml'),'utf8');
- assert.match(workflow,/permissions:\n  contents: write/);
- assert.match(workflow,/fetch-depth: 0/);
- assert.match(workflow,/Use previously verified release tag when present/);
- const publish=workflow.indexOf('      - name: Publish to Marketplace');
- const release=workflow.indexOf('      - name: Register published version on GitHub');
- assert.ok(publish>0 && release>publish);
- assert.match(workflow.slice(release),/gh release edit .*--draft=false/);
- assert.match(workflow.slice(release),/gh release create/);
- assert.match(workflow,/VS_MARKETPLACE_TOKEN/);
+test('Marketplace upload is separate from public GitHub Release',()=>{
+ const wf=fs.readFileSync(path.join(root,'.github/workflows/publish-marketplace.yml'),'utf8');
+ assert.match(wf,/workflow_dispatch:/);
+ assert.match(wf,/VS_MARKETPLACE_TOKEN/);
+ assert.match(wf,/name: Publish to Marketplace/);
+ assert.doesNotMatch(wf,/gh release (create|edit|upload)/);
 });
-
-test('Flyway versioned build artifacts and release workflow stay compatible',()=>{
+test('Flyway CI artifact is consumed by independent GitHub Release',()=>{
  const build=fs.readFileSync(path.join(root,'.github/workflows/build-vsix.yml'),'utf8');
- const release=fs.readFileSync(path.join(root,'.github/workflows/release.yml'),'utf8');
- assert.match(build,/id: ext-version/);
+ const wf=fs.readFileSync(path.join(root,'.github/workflows/github-release.yml'),'utf8');
+ const script=fs.readFileSync(path.join(root,'.github/scripts/github-release.sh'),'utf8');
  assert.match(build,/steps.ext-version.outputs.version/);
- assert.doesNotMatch(build,/v1\.2\.2-rc1/);
- assert.match(release,/flyway-tasks-v\$VERSION-vsix/);
+ assert.match(wf,/workflow_run:/);
+ assert.match(wf,/Build Flyway extension VSIX/);
+ assert.match(script,/flyway-tasks-v\$version-vsix/);
+ assert.match(script,/gh run download/);
+ assert.match(script,/gh release create/);
+ assert.doesNotMatch(script,/extension publish|VS_MARKETPLACE_TOKEN/);
 });
-
-test('Fluxos de CI e publicacao padronizados na branch main',()=>{
- for(const name of ['build-vsix.yml','publish-marketplace.yml','release.yml']) {
-  const workflow=fs.readFileSync(path.join(root,'.github/workflows',name),'utf8');
-  assert.doesNotMatch(workflow,/refs\/heads\/master|branches: \[master\]|^\s+- master$/m,name);
+test('Main branch and Node24 remain the only CI publication source',()=>{
+ for(const name of ['build-vsix.yml','publish-marketplace.yml','github-release.yml']){
+  const wf=fs.readFileSync(path.join(root,'.github/workflows',name),'utf8');
+  assert.doesNotMatch(wf,/refs\/heads\/master|branches: \[master\]|^\s+- master$/m);
  }
- const build=fs.readFileSync(path.join(root,'.github/workflows','build-vsix.yml'),'utf8');
+ const build=fs.readFileSync(path.join(root,'.github/workflows/build-vsix.yml'),'utf8');
  assert.match(build,/push:\n\s+branches:\n\s+- main/);
  assert.match(build,/pull_request:\n\s+branches:\n\s+- main/);
- const release=fs.readFileSync(path.join(root,'.github/workflows','release.yml'),'utf8');
- assert.match(release,/branches: \[main\]/);
- const publish=fs.readFileSync(path.join(root,'.github/workflows','publish-marketplace.yml'),'utf8');
+ const release=fs.readFileSync(path.join(root,'.github/workflows/github-release.yml'),'utf8');
+ assert.match(release,/head_branch == 'main'/);
+ const publish=fs.readFileSync(path.join(root,'.github/workflows/publish-marketplace.yml'),'utf8');
  assert.match(publish,/refs\/heads\/main/);
- const overview=fs.readFileSync(path.join(root,'overview.md'),'utf8');
- assert.doesNotMatch(overview,/blob\/master\//);
 });
-
 
 test('MIT license é arquivo explícito, endereçável e preserva atribuição original',()=>{
  const manifest=require('../vss-extension.json');
